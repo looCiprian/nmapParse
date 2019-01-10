@@ -29,23 +29,26 @@ def detailedTable(root):
 	generalCounter=0
 
 	# entro in tutti gli host
-	for i in root.findall('host'):	
+	for host in root.findall('host'):	
 		# lista per le porte aperte
 		portList =[]
-		for p in i.findall('ports/port'):
+		for p in host.findall('ports/port'):
 			# agigungo le porte aperte alla lista
 			portList.append(p.get('portid'))
 
 		# cerco l'ip dell host che sto scansionando
-		for h in i.findall('address'):
-			hostFounded = h.get('addr')
+		hostAddress=""
+		ipFounded=""
+		hostAddress = host.find('address')
+		ipFounded = hostAddress.get('addr')
 
 		# cerco lo stato dell'host che sto scansionando
-		for j in i.findall('status'):
-			# se e' up aggiungo una nuova riga alla tabella
-			if j.get('state') == "up":
-				generalCounter +=1
-				tableDetails.add_row([generalCounter, hostFounded, ', '.join(portList)])
+		hostStatus=""
+		hostStatus = host.find('status')
+		# se e' up aggiungo una nuova riga alla tabella
+		if hostStatus.get('state') == "up":
+			generalCounter +=1
+			tableDetails.add_row([generalCounter, ipFounded, ', '.join(portList)])
 
 	print tableDetails
 	print "\n\n"
