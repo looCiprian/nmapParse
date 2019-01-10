@@ -16,7 +16,7 @@ def simpleTable(root):
 
 	table.add_row(["-", target, ipUp, startTime, finshTime])
 
-	print "\n\n\n\n\n"
+	print ""
 	print table
 	print "\n"
 
@@ -48,20 +48,27 @@ def detailedTable(root):
 				tableDetails.add_row([generalCounter, hostFounded, ', '.join(portList)])
 
 	print tableDetails
+	print "\n\n"
 
 
 def findFiles(args):
 
+	# directory/file da dove cercare i file
 	dirWhereFindFiles = args.file[0]
-
 	foundedFile=[]
-	for file in os.listdir("."):
-	    if file.endswith(".xml"):
-	        foundedFile.append(os.path.join(".", file))
 
-	if len(foundedFile) == 0:
-		print "No file to parse\n\n\n"
-		exit(1)
+	# controllo se dirWhereFindFiles e' file o directory, se direcotry itero, altrimenti parso direttamente
+	if os.path.isdir(dirWhereFindFiles):
+		for file in os.listdir(dirWhereFindFiles):
+		    if file.endswith(".xml"):
+		        foundedFile.append(os.path.join(".", file))
+
+		if len(foundedFile) == 0:
+			print "No file to parse\n\n\n"
+			exit(1)
+	else:
+		foundedFile.append(dirWhereFindFiles)
+
 	return foundedFile	
 
 
