@@ -32,9 +32,9 @@ def detailedTable(root):
 	for host in root.findall('host'):	
 		# lista per le porte aperte
 		portList =[]
-		for p in host.findall('ports/port'):
+		for hostPort in host.findall('ports/port'):
 			# agigungo le porte aperte alla lista
-			portList.append(p.get('portid'))
+			portList.append(hostPort.get('portid'))
 
 		# cerco l'ip dell host che sto scansionando
 		hostAddress=""
