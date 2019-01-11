@@ -64,7 +64,7 @@ def findFiles(args):
 	if os.path.isdir(dirWhereFindFiles):
 		for file in os.listdir(dirWhereFindFiles):
 		    if file.endswith(".xml"):
-		        foundedFile.append(os.path.join(".", file))
+		        foundedFile.append(os.path.join(dirWhereFindFiles, file))
 
 		if len(foundedFile) == 0:
 			print "No file to parse\n\n\n"
@@ -72,7 +72,7 @@ def findFiles(args):
 	else:
 		foundedFile.append(dirWhereFindFiles)
 
-	return foundedFile	
+	return foundedFile
 
 
 def parseFile(args):
@@ -81,8 +81,12 @@ def parseFile(args):
 	foundedFile = findFiles(args)
 
 	for file in foundedFile:
-		tree = ET.parse(file)
-		root = tree.getroot()
+		try:
+			tree = ET.parse(file)
+			root = tree.getroot()
+		except:
+			print "Errore nel parsing del file xml, sei sicuro che sia xml? :)\n"
+			exit(1)
 
 		if args.verbose:
 			simpleTable(root)
@@ -99,7 +103,7 @@ def main():
 	parser = argparse.ArgumentParser(description='Process nmap xml for pre-scanning with Nessus.')
 	
 	parser.add_argument("-v","--verbose", help="print detailed table",action="store_true")
-	parser.add_argument("-f", "--file", type=str,help="",nargs=1)
+	parser.add_argument("-f", "--file", type=str,help="file or directory to parse",nargs=1)
 	args = parser.parse_args()
 
 
