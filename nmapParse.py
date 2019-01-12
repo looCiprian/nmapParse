@@ -24,7 +24,7 @@ def simpleTable(root):
 def detailedTable(root):
 
 	tableDetails = PrettyTable()
-	tableDetails.field_names = ["Number", "ip", "protocol/port"]
+	tableDetails.field_names = ["Number", "ip", "status:port number:service"]
 	# host label
 	generalCounter=0
 
@@ -32,9 +32,21 @@ def detailedTable(root):
 	for host in root.findall('host'):
 		# lista per le porte aperte
 		portList =[]
-		for hostPort in host.findall('ports/port'):
-			# agigungo le porte aperte alla lista
-			portList.append(hostPort.get('portid'))
+		# trovo la sezione delle porte per ogni host
+		hostPort = host.find('ports')
+		# iterno per tutte le porte di quell'host
+		for ports in hostPort.findall('port'):
+			# ottengo il numero di porta
+			portId = ports.get('portid')
+			# ottengo lo stato della porta
+			portStatus = ports.find('state').get('state')
+			# ottengo il servizio della porta
+			serviceName = ports.find('service').get('name')
+			# creo una stringa con tutti i dettagli rilevati precedentemente
+			portDetailed = ""
+			portDetailed = portStatus[0] + ":" + portId + ":" + serviceName
+			# lista con i dettagli delle porte per l'host che sto scansionando
+			portList.append(portDetailed)
 
 		# cerco l'ip dell host che sto scansionando
 		hostAddress=""
@@ -46,8 +58,7 @@ def detailedTable(root):
 		hostStatus=""
 		hostStatus = host.find('status')
 
-
-		# se e' up aggiungo una nuova riga alla tabella
+		# se e' up aggiungo una nuova riga alla tabella con tutti i dettagli rilevati fin'ora
 		if hostStatus.get('state') == "up":
 			generalCounter +=1
 			tableDetails.add_row([generalCounter, ipFounded, ', '.join(portList)])
@@ -92,7 +103,7 @@ def parseFile(args):
 
 		# controllo se richiesta la versione verobse (con porte)
 		if args.verbose:
-			# se la scansione nmap è solo ping non faccio niente e termino altrimenti verbose
+			# se la scansione nmap e' solo ping non faccio niente e termino altrimenti verbose
 			if "-sn" not in root.get('args'):
 				simpleTable(root)
 				detailedTable(root)

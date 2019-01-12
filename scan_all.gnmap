@@ -1,0 +1,12 @@
+# Nmap 7.60 scan initiated Sat Jan 12 10:39:56 2019 as: nmap -A -oA scan_all 192.168.1.0/24
+Host: 192.168.1.1 ()	Status: Up
+Host: 192.168.1.1 ()	Ports: 53/open/tcp//tcpwrapped///, 80/open/tcp//rtsp///, 443/open/tcp//ssl|rtsp///	Ignored State: closed (997)
+Host: 192.168.1.2 ()	Status: Up
+Host: 192.168.1.2 ()	Ports: 21/open/tcp//ftp///, 22/open/tcp//ssh//Dropbear sshd 0.48 (protocol 2.0)/, 23/open/tcp//telnet///, 80/open/tcp//http//Realtron WebServer 1.1/, 5431/open/tcp//upnp//MiniUPnP/, 50000/open/tcp//upnp//MiniUPnP/	Ignored State: closed (994)
+Host: 192.168.1.6 ()	Status: Up
+Host: 192.168.1.6 ()	Ports: 4/filtered/tcp//unknown///, 301/filtered/tcp//unknown///, 873/filtered/tcp//rsync///, 1044/filtered/tcp//dcutility///, 1069/filtered/tcp//cognex-insight///, 1100/filtered/tcp//mctp///, 1137/filtered/tcp//trim///, 1287/filtered/tcp//routematch///, 1503/filtered/tcp//imtc-mcs///, 1998/filtered/tcp//x25-svc-port///, 2968/filtered/tcp//enpp///, 3071/filtered/tcp//csd-mgmt-port///, 4125/filtered/tcp//rww///, 4321/filtered/tcp//rwhois///, 5222/filtered/tcp//xmpp-client///, 5298/filtered/tcp//presence///, 5815/filtered/tcp//unknown///, 5999/filtered/tcp//ncd-conf///, 6001/filtered/tcp//X11:1///, 6002/filtered/tcp//X11:2///, 6346/filtered/tcp//gnutella///, 6502/filtered/tcp//netop-rc///, 7625/filtered/tcp//unknown///, 9099/filtered/tcp//unknown///, 16012/filtered/tcp//unknown///, 25735/filtered/tcp//unknown///	Ignored State: closed (974)
+Host: 192.168.1.11 (raspberry-pi)	Status: Up
+Host: 192.168.1.11 (raspberry-pi)	Ports: 21/open/tcp//ftp//ProFTPD 1.3.5b/, 22/open/tcp//ssh//(protocol 2.0)/, 53/open/tcp//domain//dnsmasq 2.76/, 80/open/tcp//http//Apache httpd 2.4.25 ((Raspbian))/, 5900/open/tcp//vnc//RealVNC Enterprise 5.3 or later (protocol 5.0)/, 9091/open/tcp//http//Transmission BitTorrent management httpd (unauthorized)/	Ignored State: closed (994)
+Host: 192.168.1.113 ()	Status: Up
+Host: 192.168.1.113 ()	Ports: 21/open/tcp//ftp//ProFTPD 1.3.5b/, 22/open/tcp//ssh//(protocol 2.0)/, 53/open/tcp//domain//dnsmasq 2.76/, 80/open/tcp//http//Apache httpd 2.4.25 ((Raspbian))/, 5900/open/tcp//vnc//RealVNC Enterprise 5.3 or later (protocol 5.0)/, 9091/open/tcp//http//Transmission BitTorrent management httpd (unauthorized)/	Ignored State: closed (994)
+# Nmap done at Sat Jan 12 10:43:18 2019 -- 256 IP addresses (5 hosts up) scanned in 201.37 seconds
