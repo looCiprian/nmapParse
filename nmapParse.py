@@ -12,7 +12,7 @@ def simpleTable(root):
 	target = root.get('args').split(" ")[-1]
 	startTime = root.get('startstr')
 	finshTime = root.find('runstats/finished').get('timestr')
-	ipUp = root.find('runstats/hosts').get('up') 
+	ipUp = root.find('runstats/hosts').get('up')
 
 	table.add_row(["-", target, ipUp, startTime, finshTime])
 
@@ -29,7 +29,7 @@ def detailedTable(root):
 	generalCounter=0
 
 	# entro in tutti gli host
-	for host in root.findall('host'):	
+	for host in root.findall('host'):
 		# lista per le porte aperte
 		portList =[]
 		for hostPort in host.findall('ports/port'):
@@ -45,6 +45,8 @@ def detailedTable(root):
 		# cerco lo stato dell'host che sto scansionando
 		hostStatus=""
 		hostStatus = host.find('status')
+
+
 		# se e' up aggiungo una nuova riga alla tabella
 		if hostStatus.get('state') == "up":
 			generalCounter +=1
@@ -88,9 +90,14 @@ def parseFile(args):
 			print "Errore nel parsing del file xml, sei sicuro che sia xml? :)\n"
 			exit(1)
 
+		# controllo se richiesta la versione verobse (con porte)
 		if args.verbose:
-			simpleTable(root)
-			detailedTable(root)
+			# se la scansione nmap è solo ping non faccio niente e termino altrimenti verbose
+			if "-sn" not in root.get('args'):
+				simpleTable(root)
+				detailedTable(root)
+			else:
+				print "Verbose output not available with \"-sn\" nmap option"
 		else:
 			simpleTable(root)
 
@@ -101,7 +108,7 @@ def main():
 	#	detailedTable(root)
 
 	parser = argparse.ArgumentParser(description='Process nmap xml for pre-scanning with Nessus.')
-	
+
 	parser.add_argument("-v","--verbose", help="print detailed table",action="store_true")
 	parser.add_argument("-f", "--file", type=str,help="file or directory to parse",nargs=1)
 	args = parser.parse_args()
