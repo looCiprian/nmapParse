@@ -96,7 +96,7 @@ def findFiles(args):
 			print "No file to parse\n\n\n"
 			exit(1)
 	else:
-		# dato che args.file è una lista abbiamo una lista di lista [[file1, file2, file3]], quindi dobbiamo solo avere solo una lista [file1, file2, file3], per farlo [[file1, file2, file3]][0]
+		# dato che args.file e' una lista abbiamo una lista di lista [[file1, file2, file3]], quindi dobbiamo solo avere solo una lista [file1, file2, file3], per farlo [[file1, file2, file3]][0]
 		foundedFile.append(args.file)
 		foundedFile= foundedFile[0]
 
