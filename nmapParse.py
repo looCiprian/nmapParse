@@ -4,7 +4,7 @@ from prettytable import PrettyTable
 import sys
 import os
 
-def simpleTable(root):
+def simpleTable(root,outputFile,globalIpUpCounter):
 
 	table = PrettyTable()
 	table.field_names = ["Name", "Target", "ip up", "Start time", "Finish time"]
@@ -16,12 +16,15 @@ def simpleTable(root):
 
 	table.add_row(["-", target, ipUp, startTime, finshTime])
 
-	print ""
-	print table
-	print "\n"
+	outputFile.write("")
+	outputFile.write(table.get_string())
+	outputFile.write("\n")
 
 
-def detailedTable(root):
+	return int(ipUp)
+
+
+def detailedTable(root,outputFile):
 
 	tableDetails = PrettyTable()
 	tableDetails.field_names = ["Number", "ip", "status:port number:service"]
@@ -63,9 +66,19 @@ def detailedTable(root):
 			generalCounter +=1
 			tableDetails.add_row([generalCounter, ipFounded, ', '.join(portList)])
 
-	print tableDetails
-	print "\n\n"
+	outputFile.write(tableDetails.get_string())
+	outputFile.write("\n\n")
 
+
+
+def totalIpUp(globalIpUpCounter,outputFile):
+	totalTable = PrettyTable()
+	totalTable.field_names = ["Total up hosts founded"]
+	totalTable.add_row([str(globalIpUpCounter)])
+
+	#print totalTable
+	outputFile.write(totalTable.get_string())
+	outputFile.write("\n")
 
 def findFiles(args):
 
@@ -83,15 +96,20 @@ def findFiles(args):
 			print "No file to parse\n\n\n"
 			exit(1)
 	else:
-		foundedFile.append(dirWhereFindFiles)
+		# dato che args.file è una lista abbiamo una lista di lista [[file1, file2, file3]], quindi dobbiamo solo avere solo una lista [file1, file2, file3], per farlo [[file1, file2, file3]][0]
+		foundedFile.append(args.file)
+		foundedFile= foundedFile[0]
 
 	return foundedFile
+
 
 
 def parseFile(args):
 
 	foundedFile=[]
 	foundedFile = findFiles(args)
+	globalIpUpCounter = 0
+	outputFile = open("host_information.txt",'a')
 
 	for file in foundedFile:
 		try:
@@ -105,12 +123,16 @@ def parseFile(args):
 		if args.verbose:
 			# se la scansione nmap e' solo ping non faccio niente e termino altrimenti verbose
 			if "-sn" not in root.get('args'):
-				simpleTable(root)
-				detailedTable(root)
+				globalIpUpCounter += simpleTable(root,outputFile,globalIpUpCounter)
+				detailedTable(root,outputFile)
 			else:
 				print "Verbose output not available with \"-sn\" nmap option"
 		else:
-			simpleTable(root)
+			globalIpUpCounter += simpleTable(root,outputFile,globalIpUpCounter)
+
+	totalIpUp(globalIpUpCounter,outputFile)
+
+	outputFile.close()
 
 def main():
 
@@ -121,7 +143,7 @@ def main():
 	parser = argparse.ArgumentParser(description='Process nmap xml for pre-scanning with Nessus.')
 
 	parser.add_argument("-v","--verbose", help="print detailed table",action="store_true")
-	parser.add_argument("-f", "--file", type=str,help="file or directory to parse",nargs=1)
+	parser.add_argument("-f", "--file", type=str,help="file or directory to parse",nargs="*")
 	args = parser.parse_args()
 
 
