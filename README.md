@@ -1,10 +1,29 @@
-# nmapParse
+# Nmap Parse info
 
 ## What type of file can you parse:
 Only nmap xml files<br>
 ```
 #Generate xml file with nmap:
 nmap [NAMP OPTIONS] -oX scan
+```
+
+## What do you need:
+```
+pip install argparse
+pip install PrettyTable
+```
+
+## Usage:
+```
+nmapParse.py [-h] [-v] [-f [FILE [FILE ...]]]
+
+Process nmap xml for pre-scanning with Nessus.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --verbose         print detailed table
+  -f [FILE [FILE ...]], --file [FILE [FILE ...]]
+                        file or directory to parse
 ```
 
 ## What can you do:
@@ -49,23 +68,3 @@ cat host_information
 |           5            |
 +------------------------+
 ```
-
-## What do you need:
-```
-pip install argparse<br>
-pip install PrettyTable
-```
-
-## Usage:
-```
-nmapParse.py [-h] [-v] [-f [FILE [FILE ...]]]
-
-Process nmap xml for pre-scanning with Nessus.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -v, --verbose         print detailed table
-  -f [FILE [FILE ...]], --file [FILE [FILE ...]]
-                        file or directory to parse
-```
-
