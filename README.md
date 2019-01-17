@@ -51,9 +51,10 @@ cat host_information
 ```
 
 ## What do you need:
-
+```
 pip install argparse<br>
 pip install PrettyTable
+```
 
 ## Usage:
 ```
