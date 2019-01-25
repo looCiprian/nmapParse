@@ -142,6 +142,7 @@ def parseFile(args):
 			outputFile.close()
 			exit(1)
 
+		# per ogni file inizio a fare il parsing
 		# controllo se richiesta la versione verobse (con porte)
 		if args.verbose:
 			# se la scansione nmap e' solo ping non faccio niente e termino altrimenti verbose
@@ -162,18 +163,87 @@ def parseFile(args):
 	outputFile.close()
 
 
+# @param: root - radice del file xml
+def simpleExcel(root):
+		# entro in tutti gli host
+	for host in root.findall('host'):
+		# lista per le porte aperte
+		portList =[]
+		# trovo la sezione delle porte per ogni host
+		hostPort = host.find('ports')
+		# iterno per tutte le porte di quell'host
+		for ports in hostPort.findall('port'):
+			# ottengo il numero di porta
+			portId = ports.get('portid')
+			# ottengo lo stato della porta
+			portStatus = ports.find('state').get('state')
+			# ottengo il servizio della porta
+			serviceName = ports.find('service').get('name')
+			# ottengo il nome del prodotto
+			productName = ports.find('service').get('product')
+			# creo una stringa con tutti i dettagli rilevati precedentemente
+			portDetailed = ""
+			# utlizzo solo le porte aperte
+			if "open" in portStatus:
+				portDetailed =  portId + "\t" + serviceName + "\t" + str(productName)
+			# lista con i dettagli delle porte per l'host che sto scansionando
+			portList.append(portDetailed)
+
+		# ottengo l'ip dell host che sto scansionando
+		hostAddress=""
+		ipFounded=""
+		hostAddress = host.find('address')
+		ipFounded = hostAddress.get('addr')
+
+		# ottengo lo stato dell'host che sto scansionando
+		hostStatus=""
+		hostStatus = host.find('status').get('state')
+		# se l'host è up
+		if "up" in hostStatus:
+			# per ogni imformazione sulle porte dell'host trovata la stampo con a sinistra l'indirizzo ip
+			for i in portList:
+				if len(i) !=0:
+					print ipFounded + "\t" + i
+
+
+
+# @param: args - argomenti passati a stdin
+def parseForExcel(args):
+	foundedFile=[]
+	foundedFile = findFiles(args)
+
+	for file in foundedFile:
+		try:
+			tree = ET.parse(file)
+			root = tree.getroot()
+		except:
+			errorMessage("Errore nel parsing del file xml, sei sicuro che sia xml e che sia stato generato da nmap? :)\n")
+			outputFile.close()
+			exit(1)
+
+		# per ogni file inizio a fare il parsing
+		simpleExcel(root)
+
+
+
 def main():
 
 	parser = argparse.ArgumentParser(description='Process nmap xml for pre-scanning with Nessus.')
 
 	parser.add_argument("-v","--verbose", help="print detailed table",action="store_true")
+	parser.add_argument("-e","--excel", help="print ip and port spaced with \"tab\" for copy and past in execl",action="store_true",dest="execl")
 	parser.add_argument("-f", "--file", type=str,help="file or directory to parse",nargs="*")
 	args = parser.parse_args()
 
-
-	if args.file:
+	# modalita' normale
+	if args.file and not args.execl:
 		parseFile(args)
 
+	# modalita' excel
+	elif args.file and args.execl:
+		parseForExcel(args)
+
+	# se si sbaglia
 	else:
 		parser.print_help()
 		sys.exit(1)
