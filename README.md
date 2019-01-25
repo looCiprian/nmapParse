@@ -15,13 +15,15 @@ pip install PrettyTable
 
 ## Usage:
 ```
-nmapParse.py [-h] [-v] [-f [FILE [FILE ...]]]
+nmapParse.py [-h] [-v] [-e] [-f [FILE [FILE ...]]]
 
 Process nmap xml for pre-scanning with Nessus.
 
 optional arguments:
   -h, --help            show this help message and exit
   -v, --verbose         print detailed table
+  -e, --excel           print ip and port spaced with "tab" for copy and past
+                        in execl
   -f [FILE [FILE ...]], --file [FILE [FILE ...]]
                         file or directory to parse
 ```
@@ -29,7 +31,7 @@ optional arguments:
 ## What can you do:
 1. Normal usage:<br>
 ```
-python nmapParse.py -f [FILE [FILE ...]] or python nmapParse.py -f [DIRECTORY] <br>
+python nmapParse.py -f [FILE [FILE ...]] or python nmapParse.py -f [DIRECTORY]
 cat host_information
 +------+----------------+-------+--------------------------+--------------------------+
 | Name |     Target     | ip up |        Start time        |       Finish time        |
@@ -44,7 +46,7 @@ cat host_information
 ```
 2. Verbose usage:
 ```
-python nmapParse.py -v -f [FILE [FILE ...]] or python nmapParse.py -v -f [DIRECTORY] <br>
+python nmapParse.py -v -f [FILE [FILE ...]] or python nmapParse.py -v -f [DIRECTORY]
 cat host_information
 +------+----------------+-------+--------------------------+--------------------------+
 | Name |     Target     | ip up |        Start time        |       Finish time        |
@@ -67,4 +69,29 @@ cat host_information
 +------------------------+
 |           5            |
 +------------------------+
+```
+3. Excel usage:
+```
+python nmapParse.py -f [FILE [FILE ...]] -e or python nmapParse.py -f [DIRECTORY] -e
+192.168.1.1	53	tcpwrapped	None
+192.168.1.1	80	rtsp	None
+192.168.1.1	443	rtsp	None
+192.168.1.2	21	ftp	None
+192.168.1.2	22	ssh	Dropbear sshd
+192.168.1.2	23	telnet	None
+192.168.1.2	80	http	Realtron WebServer 1.1
+192.168.1.2	5431	upnp	MiniUPnP
+192.168.1.2	50000	upnp	MiniUPnP
+192.168.1.11	21	ftp	ProFTPD
+192.168.1.11	22	ssh	None
+192.168.1.11	53	domain	dnsmasq
+192.168.1.11	80	http	Apache httpd
+192.168.1.11	5900	vnc	RealVNC Enterprise
+192.168.1.11	9091	http	Transmission BitTorrent management httpd
+192.168.1.113	21	ftp	ProFTPD
+192.168.1.113	22	ssh	None
+192.168.1.113	53	domain	dnsmasq
+192.168.1.113	80	http	Apache httpd
+192.168.1.113	5900	vnc	RealVNC Enterprise
+192.168.1.113	9091	http	Transmission BitTorrent management httpd
 ```
