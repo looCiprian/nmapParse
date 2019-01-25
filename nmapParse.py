@@ -181,6 +181,9 @@ def simpleExcel(root):
 			serviceName = ports.find('service').get('name')
 			# ottengo il nome del prodotto
 			productName = ports.find('service').get('product')
+			# se il product name è None non stampo None ma stampo la string vuota (es. "")
+			if productName is None:
+				productName = ""
 			# creo una stringa con tutti i dettagli rilevati precedentemente
 			portDetailed = ""
 			# utlizzo solo le porte aperte
@@ -222,7 +225,12 @@ def parseForExcel(args):
 			exit(1)
 
 		# per ogni file inizio a fare il parsing
-		simpleExcel(root)
+		# controllo se la scansione e' solamente per il ping
+		if "-sn" not in root.get('args'):
+			simpleExcel(root)
+		else:
+			errorMessage("Errore nel parsing del file " + str(file) + " probabilmente la scansione e' stata effettuata con l'opzione \"-sn\"")
+			pass
 
 
 
