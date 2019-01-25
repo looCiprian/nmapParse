@@ -73,23 +73,23 @@ cat host_information
 3. Excel usage:
 ```
 python nmapParse.py -f [FILE [FILE ...]] -e or python nmapParse.py -f [DIRECTORY] -e
-192.168.1.1	53	tcpwrapped	None
-192.168.1.1	80	rtsp	None
-192.168.1.1	443	rtsp	None
-192.168.1.2	21	ftp	None
+192.168.1.1	53	tcpwrapped	
+192.168.1.1	80	rtsp	
+192.168.1.1	443	rtsp	
+192.168.1.2	21	ftp	
 192.168.1.2	22	ssh	Dropbear sshd
-192.168.1.2	23	telnet	None
+192.168.1.2	23	telnet	
 192.168.1.2	80	http	Realtron WebServer 1.1
 192.168.1.2	5431	upnp	MiniUPnP
 192.168.1.2	50000	upnp	MiniUPnP
 192.168.1.11	21	ftp	ProFTPD
-192.168.1.11	22	ssh	None
+192.168.1.11	22	ssh	
 192.168.1.11	53	domain	dnsmasq
 192.168.1.11	80	http	Apache httpd
 192.168.1.11	5900	vnc	RealVNC Enterprise
 192.168.1.11	9091	http	Transmission BitTorrent management httpd
 192.168.1.113	21	ftp	ProFTPD
-192.168.1.113	22	ssh	None
+192.168.1.113	22	ssh	
 192.168.1.113	53	domain	dnsmasq
 192.168.1.113	80	http	Apache httpd
 192.168.1.113	5900	vnc	RealVNC Enterprise
