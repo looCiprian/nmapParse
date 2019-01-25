@@ -181,7 +181,7 @@ def simpleExcel(root):
 			serviceName = ports.find('service').get('name')
 			# ottengo il nome del prodotto
 			productName = ports.find('service').get('product')
-			# se il product name è None non stampo None ma stampo la string vuota (es. "")
+			# se il product name e' None non stampo None ma stampo la string vuota (es. "")
 			if productName is None:
 				productName = ""
 			# creo una stringa con tutti i dettagli rilevati precedentemente
