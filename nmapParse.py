@@ -198,7 +198,7 @@ def simpleExcel(root):
 		# ottengo lo stato dell'host che sto scansionando
 		hostStatus=""
 		hostStatus = host.find('status').get('state')
-		# se l'host è up
+		# se l'host e' up
 		if "up" in hostStatus:
 			# per ogni imformazione sulle porte dell'host trovata la stampo con a sinistra l'indirizzo ip
 			for i in portList:
