@@ -1,13 +1,13 @@
 # Nmap Parse info
 
-## What type of file can you parse:
+## What type of files can you parse?
 Only nmap xml files<br>
 ```
 #Generate xml file with nmap:
 nmap [NAMP OPTIONS] -oX scan
 ```
 
-## What do you need:
+## What do you need?
 ```
 pip install argparse
 pip install PrettyTable
@@ -28,7 +28,7 @@ optional arguments:
                         file or directory to parse
 ```
 
-## What can you do:
+## What can you do?
 1. Normal usage:<br>
 ```
 python nmapParse.py -f [FILE [FILE ...]] or python nmapParse.py -f [DIRECTORY]
