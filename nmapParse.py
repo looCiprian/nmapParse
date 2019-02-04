@@ -18,7 +18,7 @@ def okMessage(message):
 
 
 # @param: root - radice del file xml
-# @param: outputFile - puntatre al file di output (gia aperto)
+# @param: outputFile - punta al file di output (gia aperto)
 # @param: globalIpUpCounter - conteggio totale di quanti ip sono up
 # @return: numero di ip up trovati nella root
 def simpleTable(root,outputFile,globalIpUpCounter):
@@ -41,7 +41,7 @@ def simpleTable(root,outputFile,globalIpUpCounter):
 	return int(ipUp)
 
 # @param: root - radice del file xml
-# @param: outputFile - puntatre al file di output (gia aperto)
+# @param: outputFile - punta al file di output (gia aperto)
 def detailedTable(root,outputFile):
 
 	tableDetails = PrettyTable()
@@ -89,7 +89,7 @@ def detailedTable(root,outputFile):
 
 
 # @param: globalIpUpCounter - numero totale di ip up da scrivere nel file
-# @param: outputFile - puntatre al file di output (gia aperto)
+# @param: outputFile - punta al file di output (gia aperto)
 def totalIpUp(globalIpUpCounter,outputFile):
 	totalTable = PrettyTable()
 	totalTable.field_names = ["Total up hosts founded"]
