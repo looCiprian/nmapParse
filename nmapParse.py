@@ -8,14 +8,52 @@ import os
 def errorMessage(message):
 	print '\033[91m' + message + '\033[0m'
 
+
 #@message: messaggio da stampare
 def warningMessage(message):
 	print '\033[93m' + message + '\033[0m'
+
 
 #@message: messaggio da stampare
 def okMessage(message):
 	print '\033[92m' + message + '\033[0m'
 
+
+# @param: args - argomenti passati a stdin
+# @return: lista con i percorsi assoluti dei file per il parser
+def findFiles(args):
+
+	# directory/file da dove cercare i file
+	dirWhereFindFiles = args.file[0]
+	foundedFile=[]
+
+	# controllo se dirWhereFindFiles e' file o directory, se direcotry itero, altrimenti parso direttamente
+	if os.path.isdir(dirWhereFindFiles):
+		for file in os.listdir(dirWhereFindFiles):
+		    if file.endswith(".xml"):
+		        foundedFile.append(os.path.join(dirWhereFindFiles, file))
+
+		if len(foundedFile) == 0:
+			print "No file to parse\n\n\n"
+			exit(1)
+	else:
+		# dato che args.file e' una lista abbiamo una lista di lista [[file1, file2, file3]], quindi dobbiamo solo avere solo una lista [file1, file2, file3], per farlo [[file1, file2, file3]][0]
+		foundedFile.append(args.file)
+		foundedFile= foundedFile[0]
+
+	return foundedFile
+# @param: namefile - nome del file
+# @param: path - percoso assoluto di dove salvare il file
+# @param: data - LISTA di dati da stampare
+# @param: delim - carattere da stampare per dividere due stringhe stampate (es. "\n", ",", "\t", ...)
+def writeFiles(namefile, path, data, delim):
+	absolutePath= path + "/" + namefile
+	outputFile = open(absolutePath,'w')
+
+	for i in data:
+		outputFile.write(i + delim)
+
+	outputFile.close()
 
 # @param: root - radice del file xml
 # @param: outputFile - punta al file di output (gia aperto)
@@ -37,8 +75,8 @@ def simpleTable(root,outputFile,globalIpUpCounter):
 	outputFile.write(table.get_string())
 	outputFile.write("\n\n")
 
-
 	return int(ipUp)
+
 
 # @param: root - radice del file xml
 # @param: outputFile - punta al file di output (gia aperto)
@@ -99,30 +137,6 @@ def totalIpUp(globalIpUpCounter,outputFile):
 	outputFile.write(totalTable.get_string())
 	outputFile.write("\n")
 
-# @param: args - argomenti passati a stdin
-# @return: lista con i percorsi assoluti dei file per il parser
-def findFiles(args):
-
-	# directory/file da dove cercare i file
-	dirWhereFindFiles = args.file[0]
-	foundedFile=[]
-
-	# controllo se dirWhereFindFiles e' file o directory, se direcotry itero, altrimenti parso direttamente
-	if os.path.isdir(dirWhereFindFiles):
-		for file in os.listdir(dirWhereFindFiles):
-		    if file.endswith(".xml"):
-		        foundedFile.append(os.path.join(dirWhereFindFiles, file))
-
-		if len(foundedFile) == 0:
-			print "No file to parse\n\n\n"
-			exit(1)
-	else:
-		# dato che args.file e' una lista abbiamo una lista di lista [[file1, file2, file3]], quindi dobbiamo solo avere solo una lista [file1, file2, file3], per farlo [[file1, file2, file3]][0]
-		foundedFile.append(args.file)
-		foundedFile= foundedFile[0]
-
-	return foundedFile
-
 
 # @param: args - argomenti passati a stdin
 def parseFile(args):
@@ -165,7 +179,7 @@ def parseFile(args):
 
 # @param: root - radice del file xml
 def simpleExcel(root):
-		# entro in tutti gli host
+	# entro in tutti gli host
 	for host in root.findall('host'):
 		# lista per le porte aperte
 		portList =[]
@@ -209,7 +223,6 @@ def simpleExcel(root):
 					print ipFounded + "\t" + i
 
 
-
 # @param: args - argomenti passati a stdin
 def parseForExcel(args):
 	foundedFile=[]
@@ -233,6 +246,50 @@ def parseForExcel(args):
 			pass
 
 
+# @param: root - radice del file xml
+def onlyIpUp(root):
+
+	ipUp = []
+	# entro in tutti gli host
+	for host in root.findall('host'):
+
+		# ottengo l'ip dell host che sto scansionando
+		hostAddress=""
+		ipFounded=""
+		hostAddress = host.find('address')
+		ipFounded = hostAddress.get('addr')
+
+		# ottengo lo stato dell'host che sto scansionando
+		hostStatus=""
+		hostStatus = host.find('status').get('state')
+		# se l'host e' up
+		if "up" in hostStatus:
+			ipUp.append(ipFounded)
+
+    # trasformo list in set per rimuovere i duplicati
+	setIpUp = set(ipUp)
+	for i in setIpUp:
+		print i
+
+	listIpUp= list(setIpUp)
+	writeFiles(namefile="ipUp", path=".", data=listIpUp, delim="\n")
+
+# @param: args - argomenti passati a stdin
+def parseOnlyIpUp(args):
+	foundedFile=[]
+	foundedFile = findFiles(args)
+
+	for file in foundedFile:
+		try:
+			tree = ET.parse(file)
+			root = tree.getroot()
+		except:
+			errorMessage("Errore nel parsing del file xml, sei sicuro che sia xml e che sia stato generato da nmap? :)\n")
+			outputFile.close()
+			exit(1)
+
+		onlyIpUp(root)
+
 
 def main():
 
@@ -240,16 +297,21 @@ def main():
 
 	parser.add_argument("-v","--verbose", help="print detailed table",action="store_true")
 	parser.add_argument("-e","--excel", help="print ip and port spaced with \"tab\" for copy and past in execl",action="store_true",dest="execl")
+	parser.add_argument("-p","--puntual", help="print only ip up",action="store_true",dest="puntual")
 	parser.add_argument("-f", "--file", type=str,help="file or directory to parse",nargs="*")
 	args = parser.parse_args()
 
 	# modalita' normale
-	if args.file and not args.execl:
+	if args.file and not args.execl and not args.puntual:
 		parseFile(args)
 
 	# modalita' excel
-	elif args.file and args.execl:
+	elif args.file and args.execl and not args.puntual:
 		parseForExcel(args)
+
+	# modalita' solo ip
+	elif args.file and args.puntual and not args.execl:
+		parseOnlyIpUp(args)
 
 	# se si sbaglia
 	else:
