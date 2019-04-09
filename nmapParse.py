@@ -93,19 +93,25 @@ def detailedTable(root,outputFile):
 		portList =[]
 		# trovo la sezione delle porte per ogni host
 		hostPort = host.find('ports')
-		# iterno per tutte le porte di quell'host
-		for ports in hostPort.findall('port'):
-			# ottengo il numero di porta
-			portId = ports.get('portid')
-			# ottengo lo stato della porta
-			portStatus = ports.find('state').get('state')
-			# ottengo il servizio della porta
-			serviceName = ports.find('service').get('name')
-			# creo una stringa con tutti i dettagli rilevati precedentemente
-			portDetailed = ""
-			portDetailed = portStatus[0] + ":" + portId + ":" + serviceName
-			# lista con i dettagli delle porte per l'host che sto scansionando
-			portList.append(portDetailed)
+
+		# se l'host non e up non ha porte
+		try:
+			# iterno per tutte le porte di quell'host
+			for ports in hostPort.findall('port'):
+				# ottengo il numero di porta
+				portId = ports.get('portid')
+				# ottengo lo stato della porta
+				portStatus = ports.find('state').get('state')
+				# ottengo il servizio della porta
+				serviceName = ports.find('service').get('name')
+				# creo una stringa con tutti i dettagli rilevati precedentemente
+				portDetailed = ""
+				portDetailed = portStatus[0] + ":" + portId + ":" + serviceName
+				# lista con i dettagli delle porte per l'host che sto scansionando
+				portList.append(portDetailed)
+
+		except:
+			continue
 
 		# cerco l'ip dell host che sto scansionando
 		hostAddress=""
@@ -144,7 +150,11 @@ def parseFile(args):
 	foundedFile=[]
 	foundedFile = findFiles(args)
 	globalIpUpCounter = 0
-	outputFile = open("host_information.txt",'w')
+
+	if args.output == None:
+		errorMessage("Usa l'opzione \"-o\" per impostare la directory di output")
+		exit(0)
+	outputFile = open(args.output + "/host_information.txt",'w')
 
 	# per ogni file eseguo il parsing
 	for file in foundedFile:
@@ -171,11 +181,11 @@ def parseFile(args):
 
 	# scriviamo il numero di ip totali trovati
 	totalIpUp(globalIpUpCounter,outputFile)
-	okMessage("Sono stati analizzati " + str(globalIpUpCounter) + " aprire il file \"host_information.txt\" per maggiori dettagli \nLo trovi nella cartella del parser" )
+	okMessage("Sono stati analizzati " + str(globalIpUpCounter) + " host aprire il file \"host_information.txt\" per maggiori dettagli \n")
 
 	# chiudiamo il file
 	outputFile.close()
-
+	onlyIpUp(root,args)
 
 # @param: root - radice del file xml
 def simpleExcel(root):
@@ -185,26 +195,33 @@ def simpleExcel(root):
 		portList =[]
 		# trovo la sezione delle porte per ogni host
 		hostPort = host.find('ports')
-		# iterno per tutte le porte di quell'host
-		for ports in hostPort.findall('port'):
-			# ottengo il numero di porta
-			portId = ports.get('portid')
-			# ottengo lo stato della porta
-			portStatus = ports.find('state').get('state')
-			# ottengo il servizio della porta
-			serviceName = ports.find('service').get('name')
-			# ottengo il nome del prodotto
-			productName = ports.find('service').get('product')
-			# se il product name e' None non stampo None ma stampo la string vuota (es. "")
-			if productName is None:
-				productName = ""
-			# creo una stringa con tutti i dettagli rilevati precedentemente
-			portDetailed = ""
-			# utlizzo solo le porte aperte
-			if "open" in portStatus:
-				portDetailed =  portId + "\t" + serviceName + "\t" + str(productName)
-			# lista con i dettagli delle porte per l'host che sto scansionando
-			portList.append(portDetailed)
+
+		# se l'host non e up non ha porte
+		try:
+			# iterno per tutte le porte di quell'host
+			for ports in hostPort.findall('port'):
+				# ottengo il numero di porta
+				portId = ports.get('portid')
+				# ottengo lo stato della porta
+				portStatus = ports.find('state').get('state')
+				# ottengo il servizio della porta
+				serviceName = ports.find('service').get('name')
+				# ottengo il nome del prodotto
+				productName = ports.find('service').get('product')
+				# se il product name e' None non stampo None ma stampo la string vuota (es. "")
+				if productName is None:
+					productName = ""
+				# creo una stringa con tutti i dettagli rilevati precedentemente
+				portDetailed = ""
+				# utlizzo solo le porte aperte
+				if "open" in portStatus:
+					portDetailed =  portId + "\t" + serviceName + "\t" + str(productName)
+				# lista con i dettagli delle porte per l'host che sto scansionando
+				portList.append(portDetailed)
+
+		except:
+			continue
+
 
 		# ottengo l'ip dell host che sto scansionando
 		hostAddress=""
@@ -247,7 +264,7 @@ def parseForExcel(args):
 
 
 # @param: root - radice del file xml
-def onlyIpUp(root):
+def onlyIpUp(root,args):
 
 	ipUp = []
 	# entro in tutti gli host
@@ -272,7 +289,12 @@ def onlyIpUp(root):
 		print i
 
 	listIpUp= list(setIpUp)
-	writeFiles(namefile="ipUp", path=".", data=listIpUp, delim="\n")
+	if args.output == None:
+		warningMessage("Se si vuole specificare la direcotry in cui salvare i file specificarla con l'opzione \"-o\"")
+		exit(0)
+
+	writeFiles(namefile="ipUp", path=args.output, data=listIpUp, delim="\n")
+	okMessage("Ip salvati anche nel file ipUp")
 
 # @param: args - argomenti passati a stdin
 def parseOnlyIpUp(args):
@@ -288,17 +310,19 @@ def parseOnlyIpUp(args):
 			outputFile.close()
 			exit(1)
 
-		onlyIpUp(root)
+		onlyIpUp(root,args)
 
 
 def main():
 
 	parser = argparse.ArgumentParser(description='Process nmap xml for pre-scanning with Nessus.')
 
-	parser.add_argument("-v","--verbose", help="print detailed table",action="store_true")
-	parser.add_argument("-e","--excel", help="print ip and port spaced with \"tab\" for copy and past in execl",action="store_true",dest="execl")
-	parser.add_argument("-p","--puntual", help="print only ip up",action="store_true",dest="puntual")
-	parser.add_argument("-f", "--file", type=str,help="file or directory to parse",nargs="*")
+	parser.add_argument("-v","--verbose", help="print detailed table", action="store_true")
+	parser.add_argument("-e","--excel", help="print ip and port spaced with \"tab\" for copy and past in execl", action="store_true", dest="execl")
+	parser.add_argument("-p","--puntual", help="print only ip up", action="store_true", dest="puntual")
+	parser.add_argument("-o","--output", help="set output DIRECTORY")
+	#parser.add_argument("-o","--puntual1", help="print only ip up1", action="store_true", dest="output")
+	parser.add_argument("-f", "--file", type=str, help="file or directory to parse", nargs="*")
 	args = parser.parse_args()
 
 	# modalita' normale
