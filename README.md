@@ -110,7 +110,7 @@ python nmapParse.py -f [FILE [FILE ...]] -e or python nmapParse.py -f [DIRECTORY
 192.168.1.113	5900	vnc	RealVNC Enterprise
 192.168.1.113	9091	http	Transmission BitTorrent management httpd
 ```
-4. Puntal usage
+4. Puntual usage
 ```
 python nmapParse.py -p -f [FILE [FILE ...]] or python nmapParse.py -p -f [DIRECTORY]
 192.168.1.11
