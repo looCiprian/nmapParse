@@ -15,7 +15,7 @@ pip install PrettyTable
 
 ## Usage:
 ```
-nmapParse.py [-h] [-v] [-e] [-f [FILE [FILE ...]]]
+nmapParse.py [-h] [-v] [-e] [-p] [-o OUTPUT] [-f [FILE [FILE ...]]]
 
 Process nmap xml for pre-scanning with Nessus.
 
@@ -24,6 +24,9 @@ optional arguments:
   -v, --verbose         print detailed table
   -e, --excel           print ip and port spaced with "tab" for copy and past
                         in execl
+  -p, --puntual         print only ip up
+  -o OUTPUT, --output OUTPUT
+                        set output DIRECTORY
   -f [FILE [FILE ...]], --file [FILE [FILE ...]]
                         file or directory to parse
 ```
@@ -31,27 +34,34 @@ optional arguments:
 ## What can you do?
 1. Normal usage:<br>
 ```
-python nmapParse.py -f [FILE [FILE ...]] or python nmapParse.py -f [DIRECTORY]
+python nmapParse.py -f [FILE [FILE ...]] -o [OUTPUT] or python nmapParse.py -f [DIRECTORY] -o [OUTPUT]
 cat host_information
 +------+----------------+-------+--------------------------+--------------------------+
 | Name |     Target     | ip up |        Start time        |       Finish time        |
 +------+----------------+-------+--------------------------+--------------------------+
-|  -   | 192.168.1.0/24 |   5   | Sat Jan 12 10:18:07 2019 | Sat Jan 12 10:18:08 2019 |
+|  -   | 192.168.1.0/24 |   4   | Sat Jan 12 10:18:07 2019 | Sat Jan 12 10:18:08 2019 |
 +------+----------------+-------+--------------------------+--------------------------+
 +------------------------+
 | Total up hosts founded |
 +------------------------+
-|           5            |
+|           4            |
 +------------------------+
+
+cat ipUp
+192.168.1.11
+192.168.1.113
+192.168.1.2
+192.168.1.1
+
 ```
 2. Verbose usage:
 ```
-python nmapParse.py -v -f [FILE [FILE ...]] or python nmapParse.py -v -f [DIRECTORY]
+python nmapParse.py -v -f [FILE [FILE ...]] -o [OUTPUT] or python nmapParse.py -v -f [DIRECTORY] -o [OUTPUT]
 cat host_information
 +------+----------------+-------+--------------------------+--------------------------+
 | Name |     Target     | ip up |        Start time        |       Finish time        |
 +------+----------------+-------+--------------------------+--------------------------+
-|  -   | 192.168.1.0/24 |   5   | Sat Jan 12 10:18:18 2019 | Sat Jan 12 10:18:40 2019 |
+|  -   | 192.168.1.0/24 |   4   | Sat Jan 12 10:18:18 2019 | Sat Jan 12 10:18:40 2019 |
 +------+----------------+-------+--------------------------+--------------------------+
 
 +--------+---------------+--------------------------------------------------------------------------------+
@@ -59,16 +69,21 @@ cat host_information
 +--------+---------------+--------------------------------------------------------------------------------+
 |   1    |  192.168.1.1  |                      o:53:domain, o:80:http, o:443:https                       |
 |   2    |  192.168.1.2  | o:21:ftp, o:22:ssh, o:23:telnet, o:80:http, o:5431:park-agent, o:50000:ibm-db2 |
-|   3    |  192.168.1.6  |                                                                                |
-|   4    |  192.168.1.11 | o:21:ftp, o:22:ssh, o:53:domain, o:80:http, o:5900:vnc, o:9091:xmltec-xmlmail  |
-|   5    | 192.168.1.113 | o:21:ftp, o:22:ssh, o:53:domain, o:80:http, o:5900:vnc, o:9091:xmltec-xmlmail  |
+|   3    |  192.168.1.11 | o:21:ftp, o:22:ssh, o:53:domain, o:80:http, o:5900:vnc, o:9091:xmltec-xmlmail  |
+|   4    | 192.168.1.113 | o:21:ftp, o:22:ssh, o:53:domain, o:80:http, o:5900:vnc, o:9091:xmltec-xmlmail  |
 +--------+---------------+--------------------------------------------------------------------------------+
 
 +------------------------+
 | Total up hosts founded |
 +------------------------+
-|           5            |
+|           4            |
 +------------------------+
+
+cat ipUp
+192.168.1.11
+192.168.1.113
+192.168.1.2
+192.168.1.1
 ```
 3. Excel usage:
 ```
@@ -94,4 +109,12 @@ python nmapParse.py -f [FILE [FILE ...]] -e or python nmapParse.py -f [DIRECTORY
 192.168.1.113	80	http	Apache httpd
 192.168.1.113	5900	vnc	RealVNC Enterprise
 192.168.1.113	9091	http	Transmission BitTorrent management httpd
+```
+4. Puntal usage
+```
+python nmapParse.py -p -f [FILE [FILE ...]] or python nmapParse.py -p -f [DIRECTORY]
+192.168.1.11
+192.168.1.113
+192.168.1.2
+192.168.1.1
 ```
