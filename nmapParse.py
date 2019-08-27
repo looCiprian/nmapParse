@@ -1,7 +1,11 @@
+#!/usr/bin/env python
+
 import argparse
 import xml.etree.ElementTree as ET
 from prettytable import PrettyTable
+import random
 import sys
+import string
 import os
 
 #@message: messaggio da stampare
@@ -18,6 +22,10 @@ def warningMessage(message):
 def okMessage(message):
 	print '\033[92m' + message + '\033[0m'
 
+#@return random string 8 caratteri
+def randomNameFile():
+	randomNameFile=''.join(random.choice(string.ascii_lowercase) for _ in range(8))
+	return randomNameFile
 
 # @param: args - argomenti passati a stdin
 # @return: lista con i percorsi assoluti dei file per il parser
@@ -42,13 +50,14 @@ def findFiles(args):
 		foundedFile= foundedFile[0]
 
 	return foundedFile
+
 # @param: namefile - nome del file
 # @param: path - percoso assoluto di dove salvare il file
 # @param: data - LISTA di dati da stampare
 # @param: delim - carattere da stampare per dividere due stringhe stampate (es. "\n", ",", "\t", ...)
-def writeFiles(namefile, path, data, delim):
+def writeFiles(namefile, path, data, delim, mode):
 	absolutePath= path + "/" + namefile
-	outputFile = open(absolutePath,'w')
+	outputFile = open(absolutePath, mode)
 
 	for i in data:
 		outputFile.write(i + delim)
@@ -64,7 +73,14 @@ def simpleTable(root,outputFile,globalIpUpCounter):
 	table = PrettyTable()
 	table.field_names = ["Name", "Target", "ip up", "Start time", "Finish time"]
 
-	target = root.get('args').split(" ")[-1]
+	target = root.get('args').split(" ")
+
+	if "-iL" in target:
+		position = target.index("-iL")
+		target = target[position +1]
+	else:
+		target = target[-1]
+
 	startTime = root.get('startstr')
 	finshTime = root.find('runstats/finished').get('timestr')
 	ipUp = root.find('runstats/hosts').get('up')
@@ -151,11 +167,20 @@ def parseFile(args):
 	foundedFile = findFiles(args)
 	globalIpUpCounter = 0
 
+	fileName = randomNameFile()
+
 	if args.output == None:
 		errorMessage("Usa l'opzione \"-o\" per impostare la directory di output")
+		warningMessage("Puoi usare l'opzione \"-p\" se vuoi solo gli ip up")
 		exit(0)
-	outputFile = open(args.output + "/host_information.txt",'w')
+	hostFileName=  "host_information_" + fileName
+	outputFile = open(args.output + "/" + hostFileName + ".txt",'w')
 
+
+	ipFileName = "ipUp_" + fileName
+
+	
+	listIpUp=[]
 	# per ogni file eseguo il parsing
 	for file in foundedFile:
 		try:
@@ -179,16 +204,36 @@ def parseFile(args):
 		else:
 			globalIpUpCounter += simpleTable(root,outputFile,globalIpUpCounter)
 
+
+		# ricerca dei soli ip up
+		listIpUp=onlyIpUp(root,args,listIpUp)
+
+	for i in listIpUp:
+		print i
+
+	if args.output is not None:
+		writeFiles(namefile=ipFileName , path=args.output, data=listIpUp, delim="\n", mode="a")
+
+
+	okMessage("Ip salvati anche nel file " + ipFileName)
 	# scriviamo il numero di ip totali trovati
 	totalIpUp(globalIpUpCounter,outputFile)
-	okMessage("Sono stati analizzati " + str(globalIpUpCounter) + " host aprire il file \"host_information.txt\" per maggiori dettagli \n")
+	okMessage("Sono stati analizzati " + str(globalIpUpCounter) + " host aprire il file \"" + hostFileName + ".txt\" per maggiori dettagli \n")
 
 	# chiudiamo il file
 	outputFile.close()
-	onlyIpUp(root,args)
+
+	warningMessage("Ricordati di rimuovere i duplicati dal file \"ipUp\"!!! (cat ipUp | sort -u > uniqueIpUp)")
+
 
 # @param: root - radice del file xml
-def simpleExcel(root):
+def simpleExcel(root,args):
+
+
+	fileName=randomNameFile()
+	ipFileName = "exelFormat_" + fileName
+
+
 	# entro in tutti gli host
 	for host in root.findall('host'):
 		# lista per le porte aperte
@@ -232,13 +277,21 @@ def simpleExcel(root):
 		# ottengo lo stato dell'host che sto scansionando
 		hostStatus=""
 		hostStatus = host.find('status').get('state')
+
+		outputInfo = []
+
 		# se l'host e' up
 		if "up" in hostStatus:
-			# per ogni imformazione sulle porte dell'host trovata la stampo con a sinistra l'indirizzo ip
-			for i in portList:
-				if len(i) !=0:
-					print ipFounded + "\t" + i
+			# per ogni informazione sulle porte dell'host trovata la stampo con a sinistra l'indirizzo ip
+			for port in portList:
+				if len(port) !=0:
+					outputInfo.append(ipFounded + "\t" + port)
 
+		if args.output is not None:
+			writeFiles(namefile=ipFileName , path=args.output, data=outputInfo, delim="\n", mode="a")
+		else:
+			for i in outputInfo:
+				print i			
 
 # @param: args - argomenti passati a stdin
 def parseForExcel(args):
@@ -257,16 +310,17 @@ def parseForExcel(args):
 		# per ogni file inizio a fare il parsing
 		# controllo se la scansione e' solamente per il ping
 		if "-sn" not in root.get('args'):
-			simpleExcel(root)
+			simpleExcel(root,args)
 		else:
 			errorMessage("Errore nel parsing del file " + str(file) + " probabilmente la scansione e' stata effettuata con l'opzione \"-sn\"")
 			pass
 
+	if args.output is None:		
+		warningMessage("Se si vuole specificare la direcotry in cui salvare i file specificarla con l'opzione \"-o\"")
 
 # @param: root - radice del file xml
-def onlyIpUp(root,args):
+def onlyIpUp(root,args,ipUpTot):
 
-	ipUp = []
 	# entro in tutti gli host
 	for host in root.findall('host'):
 
@@ -281,25 +335,29 @@ def onlyIpUp(root,args):
 		hostStatus = host.find('status').get('state')
 		# se l'host e' up
 		if "up" in hostStatus:
-			ipUp.append(ipFounded)
+			ipUpTot.append(ipFounded)
 
     # trasformo list in set per rimuovere i duplicati
-	setIpUp = set(ipUp)
-	for i in setIpUp:
-		print i
+	setIpUpTot = set(ipUpTot)
+	
+	#for i in setIpUp:
+	#	print i
 
-	listIpUp= list(setIpUp)
-	if args.output == None:
-		warningMessage("Se si vuole specificare la direcotry in cui salvare i file specificarla con l'opzione \"-o\"")
-		exit(0)
+	listIpUpTot=list(setIpUpTot)
 
-	writeFiles(namefile="ipUp", path=args.output, data=listIpUp, delim="\n")
-	okMessage("Ip salvati anche nel file ipUp")
+	return listIpUpTot
+		
+		
 
 # @param: args - argomenti passati a stdin
 def parseOnlyIpUp(args):
 	foundedFile=[]
 	foundedFile = findFiles(args)
+
+	fileName=randomNameFile()
+	ipFileName = "ipUp_" + fileName
+
+	listIpUp=[]
 
 	for file in foundedFile:
 		try:
@@ -310,7 +368,20 @@ def parseOnlyIpUp(args):
 			outputFile.close()
 			exit(1)
 
-		onlyIpUp(root,args)
+		# ricerca dei soli ip up
+		listIpUp=onlyIpUp(root,args,listIpUp)
+
+	for i in listIpUp:
+		print i
+
+	if args.output is not None:
+		writeFiles(namefile=ipFileName , path=args.output, data=listIpUp, delim="\n", mode="a")
+
+	
+	if args.output == None:
+		warningMessage("Se si vuole specificare la direcotry in cui salvare i file specificarla con l'opzione \"-o\"")
+	else:
+		okMessage("Ip salvati anche nel file " + ipFileName)
 
 
 def main():
@@ -325,7 +396,7 @@ def main():
 	parser.add_argument("-f", "--file", type=str, help="file or directory to parse", nargs="*")
 	args = parser.parse_args()
 
-	# modalita' normale
+	# modalita' normale o verbose
 	if args.file and not args.execl and not args.puntual:
 		parseFile(args)
 
