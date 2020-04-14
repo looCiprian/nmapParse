@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import argparse
 import xml.etree.ElementTree as ET
 from prettytable import PrettyTable
@@ -10,17 +8,17 @@ import os
 
 #@message: messaggio da stampare
 def errorMessage(message):
-	print '\033[91m' + message + '\033[0m'
+	print('\033[91m' + message + '\033[0m')
 
 
 #@message: messaggio da stampare
 def warningMessage(message):
-	print '\033[93m' + message + '\033[0m'
+	print('\033[93m' + message + '\033[0m')
 
 
 #@message: messaggio da stampare
 def okMessage(message):
-	print '\033[92m' + message + '\033[0m'
+	print('\033[92m' + message + '\033[0m')
 
 #@return random string 8 caratteri
 def randomNameFile():
@@ -42,7 +40,7 @@ def findFiles(args):
 		        foundedFile.append(os.path.join(dirWhereFindFiles, file))
 
 		if len(foundedFile) == 0:
-			print "No file to parse\n\n\n"
+			print("No file to parse\n\n\n")
 			exit(1)
 	else:
 		# dato che args.file e' una lista abbiamo una lista di lista [[file1, file2, file3]], quindi dobbiamo solo avere solo una lista [file1, file2, file3], per farlo [[file1, file2, file3]][0]
@@ -155,7 +153,7 @@ def totalIpUp(globalIpUpCounter,outputFile):
 	totalTable.field_names = ["Total up hosts founded"]
 	totalTable.add_row([str(globalIpUpCounter)])
 
-	#print totalTable
+	#print(totalTable)
 	outputFile.write(totalTable.get_string())
 	outputFile.write("\n")
 
@@ -179,7 +177,7 @@ def parseFile(args):
 
 	ipFileName = "ipUp_" + fileName
 
-	
+
 	listIpUp=[]
 	# per ogni file eseguo il parsing
 	for file in foundedFile:
@@ -209,7 +207,7 @@ def parseFile(args):
 		listIpUp=onlyIpUp(root,args,listIpUp)
 
 	for i in listIpUp:
-		print i
+		print(i)
 
 	if args.output is not None:
 		writeFiles(namefile=ipFileName , path=args.output, data=listIpUp, delim="\n", mode="a")
@@ -256,11 +254,15 @@ def simpleExcel(root,args):
 				# se il product name e' None non stampo None ma stampo la string vuota (es. "")
 				if productName is None:
 					productName = ""
+
+				productVersion = ports.find('service').get('version')
+				if productVersion is None:
+					productVersion = ""
 				# creo una stringa con tutti i dettagli rilevati precedentemente
 				portDetailed = ""
 				# utlizzo solo le porte aperte
 				if "open" in portStatus:
-					portDetailed =  portId + "\t" + serviceName + "\t" + str(productName)
+					portDetailed =  portId + ";" + serviceName + ";" + str(productName) + str(productVersion)
 				# lista con i dettagli delle porte per l'host che sto scansionando
 				portList.append(portDetailed)
 
@@ -278,6 +280,15 @@ def simpleExcel(root,args):
 		hostStatus=""
 		hostStatus = host.find('status').get('state')
 
+		# ottengo l'hostname dell'host
+		hostHostnames = host.find('hostnames')
+		hostnameList = []
+		for hostname in hostHostnames.findall('hostname'):
+			hostnameList.append(hostname.get('name'))
+		hostnameList = list(set(hostnameList))
+		hostnameString = ','.join(hostnameList)
+
+
 		outputInfo = []
 
 		# se l'host e' up
@@ -285,13 +296,13 @@ def simpleExcel(root,args):
 			# per ogni informazione sulle porte dell'host trovata la stampo con a sinistra l'indirizzo ip
 			for port in portList:
 				if len(port) !=0:
-					outputInfo.append(ipFounded + "\t" + port)
+					outputInfo.append(hostnameString + ";" + ipFounded + ";" + port)
 
 		if args.output is not None:
 			writeFiles(namefile=ipFileName , path=args.output, data=outputInfo, delim="\n", mode="a")
 		else:
-			for i in outputInfo:
-				print i			
+			for outputData in outputInfo:
+				print(outputData			)
 
 # @param: args - argomenti passati a stdin
 def parseForExcel(args):
@@ -315,7 +326,7 @@ def parseForExcel(args):
 			errorMessage("Errore nel parsing del file " + str(file) + " probabilmente la scansione e' stata effettuata con l'opzione \"-sn\"")
 			pass
 
-	if args.output is None:		
+	if args.output is None:
 		warningMessage("Se si vuole specificare la direcotry in cui salvare i file specificarla con l'opzione \"-o\"")
 
 # @param: root - radice del file xml
@@ -339,15 +350,15 @@ def onlyIpUp(root,args,ipUpTot):
 
     # trasformo list in set per rimuovere i duplicati
 	setIpUpTot = set(ipUpTot)
-	
+
 	#for i in setIpUp:
-	#	print i
+	#	print(i)
 
 	listIpUpTot=list(setIpUpTot)
 
 	return listIpUpTot
-		
-		
+
+
 
 # @param: args - argomenti passati a stdin
 def parseOnlyIpUp(args):
@@ -372,12 +383,12 @@ def parseOnlyIpUp(args):
 		listIpUp=onlyIpUp(root,args,listIpUp)
 
 	for i in listIpUp:
-		print i
+		print(i)
 
 	if args.output is not None:
 		writeFiles(namefile=ipFileName , path=args.output, data=listIpUp, delim="\n", mode="a")
 
-	
+
 	if args.output == None:
 		warningMessage("Se si vuole specificare la direcotry in cui salvare i file specificarla con l'opzione \"-o\"")
 	else:
@@ -388,11 +399,11 @@ def main():
 
 	parser = argparse.ArgumentParser(description='Process nmap xml for pre-scanning with Nessus.')
 
-	parser.add_argument("-v","--verbose", help="print detailed table", action="store_true")
-	parser.add_argument("-e","--excel", help="print ip and port spaced with \"tab\" for copy and past in execl", action="store_true", dest="execl")
-	parser.add_argument("-p","--puntual", help="print only ip up", action="store_true", dest="puntual")
+	parser.add_argument("-v","--verbose", help="detailed table", action="store_true")
+	parser.add_argument("-e","--excel", help="ip and port spaced with \";\" for copy and past in execl", action="store_true", dest="execl")
+	parser.add_argument("-p","--puntual", help="only ip up", action="store_true", dest="puntual")
 	parser.add_argument("-o","--output", help="set output DIRECTORY")
-	#parser.add_argument("-o","--puntual1", help="print only ip up1", action="store_true", dest="output")
+	#parser.add_argument("-o","--puntual1", help="print(only ip up1", action="store_true", dest="output"))
 	parser.add_argument("-f", "--file", type=str, help="file or directory to parse", nargs="*")
 	args = parser.parse_args()
 
